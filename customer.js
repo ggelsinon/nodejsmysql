@@ -17,6 +17,7 @@
 
 //need to connect to a mysql database that has items for sale stored they need ids, names, prices, qty
 var mysql = require("mysql");
+var inquirer = require("inquirer");
 
 var connection = mysql.createConnection({
   host: "localhost",
@@ -32,13 +33,33 @@ var connection = mysql.createConnection({
   database: "bamazon"
 });
 
-connection.connect(function(err) {
+connection.connect(function (err) {
   if (err) throw err;
   console.log("connected as id " + connection.threadId);
   connection.end();
 });
 
+//display items
+connection.query("SELECT * FROM products;", function (err, res) {
+  if (err) throw err;
+  for (var i = 0; i < res.length; i++) {
+    console.log("Item ID: " + res[i].id + " || Item Name: " + res[i].item_name + " || Price: " + res[i].price)
+  } inquirer
+    .prompt({
+      name: "interestedIn",
+      type: "input",
+      message: "What is the id of the item you are interested in?",
+    }).then(function (answer) {
+      console.log(answer)
+    })
+})
+
 //search inquiry will search based on two inputs item id and qty
+// function start() {
+//   console.log(products);
+
+// }
+
 
 
 
