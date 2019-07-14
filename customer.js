@@ -1,3 +1,4 @@
+// Instructions:
 // Running this application will first display all of the items available for sale. Include the ids, names, 
 // and prices of products for sale.
 
@@ -36,7 +37,7 @@ var connection = mysql.createConnection({
 connection.connect(function (err) {
   if (err) throw err;
   console.log("connected as id " + connection.threadId);
-  connection.end();
+  // connection.end();
 });
 
 //display items
@@ -44,33 +45,40 @@ connection.query("SELECT * FROM products;", function (err, res) {
   if (err) throw err;
   for (var i = 0; i < res.length; i++) {
     console.log("Item ID: " + res[i].id + " || Item Name: " + res[i].item_name + " || Price: " + res[i].price)
-  } inquirer
-    .prompt({
-      name: "interestedIn",
-      type: "input",
-      message: "What is the id of the item you are interested in?",
-    }).then(function (answer) {
-      console.log(answer)
-    })
+  }
+  inquirer
+    .prompt(
+      [{
+        name: "interestedIn",
+        type: "input",
+        message: "What is the id of the item you are interested in?",
+      },
+      // The second message should ask how many units of the product they would like to buy.
+      {
+        name: "orderQty",
+        type: "input",
+        message: `How many units would you like to order?`
+      },
+
+      ]).then(function (answer) {
+        console.log(answer)
+        connection.query("SELECT qty FROM products WHERE ?", {
+          id: answer.interestedIn,
+        }, function (err, res) {
+          console.log(err);
+          if (err) throw err;
+          console.log(res)
+        })
+      })
+  //we will then need to confirm that the qty of that item is sufficient to fill the order
+
+
+  //if no return a message about insufficient qty
+
+  //to fufil the customer's order if there is enough qty we will need to do the following
+
+  //update sql db to reflect remaining qty
+
+  //show customer total cost of their purchase
+
 })
-
-//search inquiry will search based on two inputs item id and qty
-// function start() {
-//   console.log(products);
-
-// }
-
-
-
-
-//we will then need to confirm that the qty is sufficient to fill the order
-
-
-//if no return a message about insufficient qty
-
-
-//to fufil the customer's order if there is enough qty we will need to do the following
-
-//update sql db to reflect remaining qty
-
-//show customer total cost of their purchase
