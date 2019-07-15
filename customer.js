@@ -19,6 +19,7 @@
 //need to connect to a mysql database that has items for sale stored they need ids, names, prices, qty
 var mysql = require("mysql");
 var inquirer = require("inquirer");
+require("console.table");
 
 var connection = mysql.createConnection({
   host: "localhost",
@@ -37,48 +38,88 @@ var connection = mysql.createConnection({
 connection.connect(function (err) {
   if (err) throw err;
   console.log("connected as id " + connection.threadId);
-  // connection.end();
+
+  //display items
+  displayitems();
 });
 
-//display items
-connection.query("SELECT * FROM products;", function (err, res) {
-  if (err) throw err;
-  for (var i = 0; i < res.length; i++) {
-    console.log("Item ID: " + res[i].id + " || Item Name: " + res[i].item_name + " || Price: " + res[i].price)
-  }
+function displayitems() {
+  connection.query("SELECT * FROM products;", function (err, res) {
+    if (err) throw err;
+
+    for (var i = 0; i < res.length; i++) {
+      console.log("Item ID: " + res[i].id + " || Item Name: " + res[i].item_name + " || Price: " + res[i].price);
+    }
+    customerPromptA(res);
+  });
+}
+
+
+function customerPromptA(item) {
+
   inquirer
-    .prompt(
-      [{
-        name: "interestedIn",
-        type: "input",
-        message: "What is the id of the item you are interested in?",
-      },
-      // The second message should ask how many units of the product they would like to buy.
+    .prompt([
       {
-        name: "orderQty",
         type: "input",
-        message: `How many units would you like to order?`
-      },
+        name: "choice",
+        message: "What item are you interested in?",
+      }
+    ])
+    .then(function(res) {
 
-      ]).then(function (answer) {
-        console.log(answer)
-        connection.query("SELECT qty FROM products WHERE ?", {
-          id: answer.interestedIn,
-        }, function (err, res) {
-          console.log(err);
-          if (err) throw err;
-          console.log(res)
-        })
-      })
-  //we will then need to confirm that the qty of that item is sufficient to fill the order
+      var choiceId = parseInt(res.choice);
+      var product = checkitem(choiceId, item);
 
+      if (product) {
+        qtyPrompt(product);
+      }
+      else {
+        console.log("There was an issue with the item you selected");
+        displayitems();
+      }
+    });
+}
 
-  //if no return a message about insufficient qty
+function qtyPrompt(product) {
+  inquirer
+    .prompt([
+      {
+        type: "input",
+        name: "quantity",
+        message: "What quantity would you like to order?",
+      }
+    ])
+    .then(function(res) {
 
-  //to fufil the customer's order if there is enough qty we will need to do the following
+      var quantity = parseInt(res.quantity);
 
-  //update sql db to reflect remaining qty
+       if (quantity > product.stock_quantity) {
+        console.log("Insufficient quantity!");
+        displayitems();
+      }
+      else {
+        fulfill(product, quantity);
+      }
+    });
+}
 
-  //show customer total cost of their purchase
+function fulfill(product, quantity) {
+  connection.query(
+    "UPDATE products SET stock_quantity = stock_quantity - ? WHERE id = ?",
+    [quantity, product.id],
+    function(err, res) {
+      console.log("Please enjoy the " + quantity + " count of " + product.item_name + " you have purchased!" + " Your order cost is $"+product.price*quantity);
+      displayitems();
+    }
+  );
+}
 
-})
+function checkitem(choiceId, item) {
+  for (var i = 0; i < item.length; i++) {
+    if (item[i].id === choiceId) {
+      return item[i];
+    }
+  }
+
+  return null;
+}
