@@ -2,6 +2,8 @@
 
 <iframe width="560" height="315" src="https://www.youtube.com/embed/zJ3QxmmsmiA" frameborder="0" allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
 
+[![Full YouTubeDemo](https://img.youtube.com/vi/zJ3QxmmsmiA/0.jpg)](https://www.youtube.com/watch?v=zJ3QxmmsmiA)
+
 Welcome to bamazon... Gelsinon style. Where you can purchase as much security, love and happiness as we have in stock (and you can afford)!!
 
 This node, js, mysql app functions as follows:
