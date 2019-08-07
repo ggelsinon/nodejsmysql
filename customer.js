@@ -65,7 +65,7 @@ function customerPromptA(item) {
         message: "What item are you interested in?",
       }
     ])
-    .then(function(res) {
+    .then(function (res) {
 
       var choiceId = parseInt(res.choice);
       var product = checkitem(choiceId, item);
@@ -89,12 +89,13 @@ function qtyPrompt(product) {
         message: "What quantity would you like to order?",
       }
     ])
-    .then(function(res) {
+    .then(function (res) {
 
       var quantity = parseInt(res.quantity);
 
-       if (quantity > product.stock_quantity) {
-        console.log("Insufficient quantity!");
+      //  if (quantity > product.stock_quantity) {
+      if (quantity > product.qty) {
+        console.log("Insufficient quantity! Try again");
         displayitems();
       }
       else {
@@ -103,17 +104,47 @@ function qtyPrompt(product) {
     });
 }
 
-function fulfill(product, quantity) {
-  connection.query(
-    "UPDATE products SET stock_quantity = stock_quantity - ? WHERE id = ?",
-    [quantity, product.id],
-    function(err, res) {
-      console.log("Please enjoy the " + quantity + " count of " + product.item_name + " you have purchased!" + " Your order cost is $"+product.price*quantity);
-      displayitems();
-    }
-  );
+function whatNow(){
+  inquirer
+        .prompt([
+          {
+            type: "input",
+            name: "next",
+            message: "would you like to purchase another item Y/N?",
+          }
+        ]).
+        then(function (res) {
+
+          var answer = res.next;
+
+          if (answer === "Y") {
+            displayitems();
+          }
+          else if(answer === "N")
+          {
+            console.log("Thanks for shopping with us, have a good day!!");
+          }
+          else
+          {
+            console.log("sorry we did not understand your response");
+            displayitems();
+          }
+        });
+
 }
 
+function fulfill(product, quantity) {
+  connection.query(
+    // "UPDATE products SET stock_quantity = stock_quantity - ? WHERE id = ?",
+    "UPDATE products SET qty = qty - ? WHERE id = ?",
+    [quantity, product.id],
+    function (err, res) {
+      console.log("Please enjoy the " + quantity + " count of " + product.item_name + " you have purchased!" + " Your order cost is $" + product.price * quantity);
+      // displayitems();
+      console.log 
+      whatNow();
+    }
+  )}
 function checkitem(choiceId, item) {
   for (var i = 0; i < item.length; i++) {
     if (item[i].id === choiceId) {
